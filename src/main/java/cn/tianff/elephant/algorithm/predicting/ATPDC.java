@@ -6,8 +6,19 @@ import cn.tianff.elephant.model.tracking.Result;
 import java.util.List;
 import java.util.concurrent.Future;
 
-public class ATPDC implements Predicts{
+public class ATPDC implements Predicts {
 
+    private Property property;
+
+    private static final Property defaultProperty = createDefaultProperty();
+
+    public ATPDC() {
+        this(defaultProperty);
+    }
+
+    public ATPDC(Property property) {
+        this.property = property;
+    }
 
     @Override
     public void setProperty(Property property) {
@@ -26,6 +37,14 @@ public class ATPDC implements Predicts{
 
     @Override
     public Future<Result> predict() {
+
         return null;
     }
+
+    private static Property createDefaultProperty() {
+
+
+        return null;
+    }
+
 }
