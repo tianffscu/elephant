@@ -1,16 +1,8 @@
 package cn.tianff.elephant.model.location;
 
-public class GPSGridLocation {
+import org.apache.commons.math3.ml.clustering.Clusterable;
 
-    /**
-     * Six period of one day
-     */
-    public static final int Midnight2SixAM = 0;
-    public static final int SixAM2NineAM = 1;
-    public static final int NineAM2Noon = 2;
-    public static final int Noon2TwoPM = 3;
-    public static final int TwoPM2SixPM = 4;
-    public static final int SixPM2MidNight = 5;
+public class GPSGridLocation implements Clusterable{
 
     /**
      * We split the 2-Dimensional plane as grids,
@@ -49,5 +41,11 @@ public class GPSGridLocation {
 
     public double getGridY() {
         return gridY;
+    }
+
+    // TODO: 2018/4/4  
+    @Override
+    public double[] getPoint() {
+        return new double[0];
     }
 }

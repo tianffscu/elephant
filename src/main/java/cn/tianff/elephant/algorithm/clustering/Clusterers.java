@@ -7,26 +7,31 @@ public class Clusterers {
     private Clusterers() {
     }
 
+    public static <T extends Clusterable> Clusterer<T> newClustererBy(Class clazz) {
+        // TODO: 2018/4/4
+        return null;
+    }
+
     // TODO: 2018/3/21
-    public <T extends Clusterable> KMeansPlusPlusClusterer<T> newKeansPlusPlusClusterer() {
+    public static <T extends Clusterable> KMeansPlusPlusClusterer<T> newKeansPlusPlusClusterer() {
 
         return null;
     }
 
     // TODO: 2018/3/21
-    public <T extends Clusterable> MultiKMeansPlusPlusClusterer<T> newMultiKMeansPlusPlusClusterer() {
+    public static <T extends Clusterable> MultiKMeansPlusPlusClusterer<T> newMultiKMeansPlusPlusClusterer() {
 
         return null;
     }
 
     // TODO: 2018/3/21
-    public <T extends Clusterable> DBSCANClusterer<T> newDBSCANClusterer() {
+    public static <T extends Clusterable> DBSCANClusterer<T> newDBSCANClusterer() {
 
         return null;
     }
 
     // TODO: 2018/3/21
-    public <T extends Clusterable> FuzzyKMeansClusterer<T> newFuzzyKMeansClusterer() {
+    public static <T extends Clusterable> FuzzyKMeansClusterer<T> newFuzzyKMeansClusterer() {
 
         return null;
     }
