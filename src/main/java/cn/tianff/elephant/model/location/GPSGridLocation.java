@@ -1,5 +1,6 @@
 package cn.tianff.elephant.model.location;
 
+import cn.tianff.elephant.model.tracking.TimePeriod;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 
 public class GPSGridLocation implements Clusterable{
@@ -12,7 +13,7 @@ public class GPSGridLocation implements Clusterable{
     private double gridX;
     private double gridY;
 
-    private int timePeriod;
+    private TimePeriod timePeriod;
 
     /**
      * todo: 修改构造函数使得通过构造函数传参可以完成经纬度到grid_x，grid_y的转换
@@ -20,7 +21,7 @@ public class GPSGridLocation implements Clusterable{
     protected GPSGridLocation() {
     }
 
-    public GPSGridLocation(GPSPoint point, int timePeriod) {
+    public GPSGridLocation(GPSPoint point, TimePeriod timePeriod) {
 
     }
 

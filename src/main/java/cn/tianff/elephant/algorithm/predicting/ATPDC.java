@@ -4,6 +4,7 @@ import cn.tianff.elephant.algorithm.clustering.Clusterers;
 import cn.tianff.elephant.model.location.GPSGridLocation;
 import cn.tianff.elephant.model.location.GPSPoint;
 import cn.tianff.elephant.model.tracking.Result;
+import cn.tianff.elephant.model.tracking.TrackResult;
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.Clusterer;
 
@@ -41,6 +42,7 @@ public class ATPDC implements Predicts {
 
     public ATPDC(Property property) {
         this.property = property;
+        mResult = new TrackResult();
     }
 
     @Override
@@ -62,20 +64,44 @@ public class ATPDC implements Predicts {
     public Future<Result> predict() {
 
         //check 数据完整性
+        //检查movingPoints是否有合法数据
 
 
         Future f = new CompletableFuture();
         //1.将用户一天完整的移动点集Setmov 按六个时间段划分为六个相应的移动点子集，
         //分别在各移动点子集上使用 密度聚类算法 对移动点进行聚类形成新 轨迹簇 集合
         //Trajnew，并计算相应的轨迹点及其影响区域，执行步骤2
-        Class<? extends Cluster> clazz = property.getClusterType();
-        Clusterer<GPSGridLocation> clusterer = Clusterers.newClustererBy(clazz);
+
+        //获取一个当前配置的聚类方案
+        Class<? extends Clusterer> clazz = property.getClusterType();
+        Clusterer<GPSGridLocation> clusterer = Clusterers.newClustererBy(clazz,GPSGridLocation.class);
+
+        //循环6个时间段的集合，对每一个集合做聚类
+        for (Set<GPSGridLocation> s: movingPoints) {
+            List clusteringResult = clusterer.cluster(s);
+
+            Cluster<GPSGridLocation>
+        }
+        
+//        movingPoints.parallelStream().
+//                forEach(this::clustering4Each);
+
         // TODO: 2018/4/4 @SupressWarning
-        List clusters = clusterer.cluster(movingLocationData);
+//        List clusters = clusterer.cluster(movingLocationData);
 
 
         //2. 如果Trajold 为空，依次计算各时间段内轨迹点的预测概率并构建用户的移动轨迹
         //预测模型TM；如果Trajold 非空，则执行步骤3
+
+        return null;
+    }
+
+    /**
+     * 对一组GPS位置点做聚类
+     * @param periodLocations
+     */
+    private List<Cluster<GPSGridLocation>> clustering4Each(Set<GPSGridLocation> periodLocations,Clusterer<GPSGridLocation> clusterer) {
+
 
         return null;
     }
@@ -89,7 +115,7 @@ public class ATPDC implements Predicts {
         //GPS经纬度转换到能够参与运算的Grid_x,Grid_y
 
 
-        //将处理过的数据按照时间段划分
+        //将处理过的数据按照时间段划分放到movingPoints
     }
 
     private static Property createDefaultProperty() {
