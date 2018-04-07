@@ -25,6 +25,14 @@ public class GPSGridLocation implements Clusterable{
 
     }
 
+    public GPSGridLocation(double gridX,double gridY){
+
+    }
+
+    public TimePeriod getTimePeriod() {
+        return timePeriod;
+    }
+
     /**
      * if a GPS point in the specific zone
      *

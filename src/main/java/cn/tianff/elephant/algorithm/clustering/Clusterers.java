@@ -8,7 +8,7 @@ public class Clusterers {
     private Clusterers() {
     }
 
-    public static <E extends Clusterer, T extends Clusterable> Clusterer newClustererBy(Class<E> clusterer, Class<T> clusterable) {
+    public static <E extends Clusterer, T extends Clusterable> Clusterer<T> newClustererBy(Class<E> clusterer, Class<T> clusterable) {
         // TODO: 2018/4/4
         String clustererName = clusterer.getSimpleName();
         switch (clustererName) {
