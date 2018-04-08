@@ -12,9 +12,12 @@ public class TrackResult implements Result, Serializable {
 
     private Map<TimePeriod, List<TrackPoint>> trackPoints;
 
+    private Map<TimePeriod, Map<TrackPoint, Double>> probabilities;
+
     public TrackResult() {
         clusters4EachTimePeriod = new HashMap<>(TimePeriod.values().length);
         trackPoints = new HashMap<>(TimePeriod.values().length);
+        probabilities = new HashMap<>(TimePeriod.values().length);
     }
 
     public Map<TimePeriod, List<Cluster<GPSGridLocation>>> getClusters4EachTimePeriod() {
@@ -27,6 +30,7 @@ public class TrackResult implements Result, Serializable {
      *
      * @Nullable
      */
+    @Override
     public List<Cluster<GPSGridLocation>> addClusters4EachTimePeriod(TimePeriod period, List<Cluster<GPSGridLocation>> clusters) {
         Objects.requireNonNull(clusters);
         Objects.requireNonNull(period);
@@ -51,9 +55,13 @@ public class TrackResult implements Result, Serializable {
         }
     }
 
-    public List<TrackPoint> addTrackPoint4EachTimePeriod(TimePeriod period,List<TrackPoint> points){
+    public List<TrackPoint> addTrackPoint4EachTimePeriod(TimePeriod period, List<TrackPoint> points) {
         // TODO: 2018/4/7
         return null;
+    }
+
+    public void setProbabilities(Map<TimePeriod, Map<TrackPoint, Double>> probabilities) {
+        this.probabilities = probabilities;
     }
 
     @Override
@@ -69,5 +77,11 @@ public class TrackResult implements Result, Serializable {
     @Override
     public Map<GPSGridLocation, Double> getProbabilities() {
         return null;
+    }
+
+    public Double getProbabilities4Time(TimePeriod period, TrackPoint point) {
+        Map<TrackPoint, Double> mm = probabilities.get(period);
+        Objects.requireNonNull(mm, "Illegal TimePeriod!");
+        return mm.getOrDefault(point, 0d);
     }
 }

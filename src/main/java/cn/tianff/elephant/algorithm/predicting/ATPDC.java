@@ -9,8 +9,11 @@ import cn.tianff.elephant.model.tracking.TrackPoint;
 import cn.tianff.elephant.model.tracking.TrackResult;
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.Clusterer;
+import org.springframework.util.CollectionUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -23,7 +26,16 @@ public class ATPDC implements Predicts {
 
     private Property property;
 
-    private TrackResult mResult;
+    /**
+     * Result 4 this calculation
+     */
+    private Result mResult;
+
+    /**
+     * May not exist;
+     * Result of last calculation
+     */
+    private Result oldResult;
 
     private List<GPSPoint> data;
 
@@ -60,6 +72,8 @@ public class ATPDC implements Predicts {
 
     @Override
     public void accept(Result result, List<GPSPoint> data) {
+        this.oldResult = result;
+        // TODO: 2018/4/8
 
     }
 
@@ -108,11 +122,33 @@ public class ATPDC implements Predicts {
         //2. 如果Trajold 为空，依次计算各时间段内轨迹点的预测概率并构建用户的移动轨迹
         //预测模型TM；如果Trajold 非空，则执行步骤3
 
+        if (oldResult == null) {
+            Map<TimePeriod, List<TrackPoint>> map = mResult.getClusterTrackPoints();
+            final Map<TimePeriod, Map<TrackPoint, Double>> probabilities = new HashMap<>();
+            map.forEach((time, ll) -> probabilities.put(time, calculateProbability(ll)));
+            mResult.setProbabilities(probabilities);
+        } else {
+            /**
+             * 合并Trajold 和Trajnew 中相应时间段内的轨迹簇并更新轨迹点及其影响区域。根
+             据轨迹点相似度的定义，依次在Trajold 中查找与Trajnew 中每一个新轨迹簇最相似的旧轨
+             迹簇，如果相似度大于或等于阈值smod，则将新轨迹簇与旧轨迹簇合并，然后从Trajnew
+             中删除已经被合并的新轨迹簇；
+             */
+
+
+        }
+
+
         return null;
     }
 
     private TrackPoint calculateEffect(Cluster<GPSGridLocation> cluster) {
         // TODO: 2018/4/7 计算轨迹点及其影响区域
+        return null;
+    }
+
+    private Map<TrackPoint,Double> calculateProbability(List<TrackPoint> ll) {
+        // TODO: 2018/4/8
         return null;
     }
 
