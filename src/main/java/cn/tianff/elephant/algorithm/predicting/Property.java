@@ -1,27 +1,16 @@
 package cn.tianff.elephant.algorithm.predicting;
 
 import org.apache.commons.math3.ml.clustering.Cluster;
+import org.apache.commons.math3.ml.clustering.Clusterer;
 
 public class Property {
+    private Class<? extends Clusterer> clusterType;
 
-    /**
-     * Six period of one day
-     * TODO: 暂时不做时间段自定义，时间段划分全部走以下六个子段
-     */
-    public static final int Midnight2SixAM = 0;
-    public static final int SixAM2NineAM = 1;
-    public static final int NineAM2Noon = 2;
-    public static final int Noon2TwoPM = 3;
-    public static final int TwoPM2SixPM = 4;
-    public static final int SixPM2MidNight = 5;
-
-    private Class<? extends Cluster> clusterType;
-
-    public Class<? extends Cluster> getClusterType() {
+    public Class<? extends Clusterer> getClusterType() {
         return clusterType;
     }
 
-    public void setClusterType(Class<? extends Cluster> clusterType) {
+    public void setClusterType(Class<? extends Clusterer> clusterType) {
         this.clusterType = clusterType;
     }
 
