@@ -6,6 +6,7 @@ import cn.tianff.elephant.model.location.GPSPoint;
 import cn.tianff.elephant.model.tracking.Result;
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.Clusterer;
+import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
 
 import java.util.List;
 import java.util.Set;
