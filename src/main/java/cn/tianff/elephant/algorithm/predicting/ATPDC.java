@@ -9,7 +9,6 @@ import cn.tianff.elephant.model.tracking.TrackPoint;
 import cn.tianff.elephant.model.tracking.TrackResult;
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.Clusterer;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
