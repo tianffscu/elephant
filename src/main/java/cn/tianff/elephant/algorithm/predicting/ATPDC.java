@@ -11,10 +11,7 @@ import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.Clusterer;
 import org.springframework.util.CollectionUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -129,12 +126,37 @@ public class ATPDC implements Predicts {
             mResult.setProbabilities(probabilities);
         } else {
             /**
-             * 合并Trajold 和Trajnew 中相应时间段内的轨迹簇并更新轨迹点及其影响区域。根
-             据轨迹点相似度的定义，依次在Trajold 中查找与Trajnew 中每一个新轨迹簇最相似的旧轨
-             迹簇，如果相似度大于或等于阈值smod，则将新轨迹簇与旧轨迹簇合并，然后从Trajnew
-             中删除已经被合并的新轨迹簇；
+             * 合并Trajold 和Trajnew 中相应时间段内的轨迹簇并更新轨迹点及其影响区域。
+             * 根据轨迹点相似度的定义，依次在Trajold 中查找与Trajnew 中每一个新轨迹簇最相似的旧轨
+             * 迹簇，如果相似度大于或等于阈值smod，则将新轨迹簇与旧轨迹簇合并，然后从Trajnew
+             * 中删除已经被合并的新轨迹簇；
              */
 
+            Map<TimePeriod, List<TrackPoint>> oldTime2TrackPoint = oldResult.getClusterTrackPoints();
+            Map<TimePeriod, List<TrackPoint>> newTime2TrackPoint = mResult.getClusterTrackPoints();
+
+            oldTime2TrackPoint.forEach((time, list) -> {
+
+                List<TrackPoint> ll = newTime2TrackPoint.get(time);
+
+                list.forEach(p -> {
+                    //descend
+                    ll.sort((p1, p2) -> (int) (calculateSimilarity(p, p2) - calculateSimilarity(p, p1)));
+
+                    if (Objects.nonNull(ll.get(0))
+                            && calculateSimilarity(p, ll.get(0)) >= property.getSimilarityDuringModeling()) {
+
+                        //合并到oldResult并删除newResult中的数据
+
+                        // TODO: 2018/4/11
+
+                        ll.remove(0);
+                    }
+
+                });
+
+
+            });
 
         }
 
@@ -142,12 +164,18 @@ public class ATPDC implements Predicts {
         return null;
     }
 
+    private double calculateSimilarity(TrackPoint p1, TrackPoint p2) {
+
+
+        return 0;
+    }
+
     private TrackPoint calculateEffect(Cluster<GPSGridLocation> cluster) {
         // TODO: 2018/4/7 计算轨迹点及其影响区域
         return null;
     }
 
-    private Map<TrackPoint,Double> calculateProbability(List<TrackPoint> ll) {
+    private Map<TrackPoint, Double> calculateProbability(List<TrackPoint> ll) {
         // TODO: 2018/4/8
         return null;
     }

@@ -1,6 +1,5 @@
 package cn.tianff.elephant.algorithm.predicting;
 
-import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.Clusterer;
 
 public class Property {
