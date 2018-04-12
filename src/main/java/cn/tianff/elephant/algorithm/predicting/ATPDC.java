@@ -120,9 +120,9 @@ public class ATPDC implements Predicts {
 
         if (oldResult == null) {
             Map<TimePeriod, List<TrackPoint>> map = mResult.getClusterTrackPoints();
-            final Map<TimePeriod, Map<TrackPoint, Double>> probabilities = new HashMap<>();
-            map.forEach((time, ll) -> probabilities.put(time, calculateProbability(ll)));
-            mResult.setProbabilities(probabilities);
+//            final Map<TimePeriod, Map<TrackPoint, Double>> probabilities = new HashMap<>();
+            map.forEach((time, ll) -> calculateProbability(ll));
+//            mResult.setProbabilities(probabilities);
         } else {
             /**
              * 合并Trajold 和Trajnew 中相应时间段内的轨迹簇并更新轨迹点及其影响区域。
@@ -143,19 +143,32 @@ public class ATPDC implements Predicts {
                     ll.sort((p1, p2) -> (int) (calculateSimilarity(p, p2) - calculateSimilarity(p, p1)));
 
                     if (Objects.nonNull(ll.get(0))
+                            // TODO: 2018/4/12 优化代码：
                             && calculateSimilarity(p, ll.get(0)) >= property.getSimilarityDuringModeling()) {
 
                         //合并到oldResult并删除newResult中的数据
-
                         // TODO: 2018/4/11
-
+                        oldResult.addClusters4EachTimePeriod(time, Collections.singletonList(ll.get(0).getCluster()));
                         ll.remove(0);
                     }
-
                 });
+            });
+
+            //删除Trajold 中各时间段内的无效轨迹簇和轨迹点
+
+            Map<TimePeriod, List<Cluster<GPSGridLocation>>> time2Clusters = oldResult.getClusters4EachTimePeriod();
+            time2Clusters.forEach((time, list) -> {
+                List<TrackPoint> trackPoints = list.stream()
+                        .map(this::calculateEffect)
+                        .collect(Collectors.toList());
+                calculateProbability(trackPoints);
+
+                trackPoints.sort((p1, p2) -> (int) (p2.getProbability() - p1.getProbability()));
+
 
 
             });
+
 
         }
 
@@ -170,13 +183,18 @@ public class ATPDC implements Predicts {
     }
 
     private TrackPoint calculateEffect(Cluster<GPSGridLocation> cluster) {
+        TrackPoint trackPoint = new TrackPoint(cluster);
+
+
         // TODO: 2018/4/7 计算轨迹点及其影响区域
-        return null;
+
+        return trackPoint;
     }
 
-    private Map<TrackPoint, Double> calculateProbability(List<TrackPoint> ll) {
+    private void calculateProbability(List<TrackPoint> ll) {
         // TODO: 2018/4/8
-        return null;
+
+
     }
 
     /**

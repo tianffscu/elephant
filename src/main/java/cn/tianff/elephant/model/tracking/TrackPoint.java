@@ -1,6 +1,7 @@
 package cn.tianff.elephant.model.tracking;
 
 import cn.tianff.elephant.model.location.GPSGridLocation;
+import org.apache.commons.math3.ml.clustering.Cluster;
 
 import java.util.Objects;
 
@@ -14,6 +15,11 @@ public class TrackPoint {
     private GPSGridLocation virtualLocation;
 
     /**
+     * The Location-Cluster this virtual point presents
+     */
+    private Cluster<GPSGridLocation> cluster;
+
+    /**
      * the quantity of gps location which can be infected by the virtual localtion.
      */
     private int weight;
@@ -23,6 +29,12 @@ public class TrackPoint {
      */
     private double radius;
 
+    private double probability;
+
+    public TrackPoint(Cluster<GPSGridLocation> cluster) {
+        this.cluster = cluster;
+    }
+
     public double getX() {
         Objects.requireNonNull(virtualLocation, "Central location value has not been set!");
         return virtualLocation.getGridX();
@@ -31,6 +43,14 @@ public class TrackPoint {
     public double getY() {
         Objects.requireNonNull(virtualLocation, "Central location value has not been set!");
         return virtualLocation.getGridY();
+    }
+
+    public Cluster<GPSGridLocation> getCluster() {
+        return cluster;
+    }
+
+    public void setCluster(Cluster<GPSGridLocation> cluster) {
+        this.cluster = cluster;
     }
 
     public void setLocation(double x, double y) {
@@ -51,5 +71,13 @@ public class TrackPoint {
 
     public void setRadius(double radius) {
         this.radius = radius;
+    }
+
+    public double getProbability() {
+        return probability;
+    }
+
+    public void setProbability(double probability) {
+        this.probability = probability;
     }
 }

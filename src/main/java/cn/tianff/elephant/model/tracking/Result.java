@@ -29,12 +29,12 @@ public interface Result {
 //    List<TrackPoint> addTrackPoint4EachTimePeriod(TimePeriod period, List<TrackPoint> points);
     List<Cluster<GPSGridLocation>> addClusters4EachTimePeriod(TimePeriod period, List<Cluster<GPSGridLocation>> clusters);
 
-    /**
-     * 获取当前模型下，目标出现在某一个时间段内某一个轨迹点的概率
-     */
-    Double getProbabilities4Time(TimePeriod period, TrackPoint point);
-
-    void setProbabilities(Map<TimePeriod, Map<TrackPoint, Double>> map);
+//    /**
+//     * 获取当前模型下，目标出现在某一个时间段内某一个轨迹点的概率
+//     */
+//    Double getProbabilities4Time(TimePeriod period, TrackPoint point);
+//
+//    void setProbabilities(Map<TimePeriod, Map<TrackPoint, Double>> map);
 
     /**
      * 获取当前模型下，建模对象出现在某个轨迹点的概率
