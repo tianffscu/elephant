@@ -43,7 +43,7 @@ public class ATPDC implements Predicts {
     /**
      * 按六个时间段划分为六个相应的移动点子集
      */
-    private List<List<GPSGridLocation>> movingPoints;
+    private Map<TimePeriod, List<GPSGridLocation>> movingPoints;
 
     private static final Property defaultProperty = createDefaultProperty();
 
@@ -66,6 +66,12 @@ public class ATPDC implements Predicts {
         processData(data);
     }
 
+    public void accept2(List<GPSGridLocation> data) {
+        this.movingLocationData = data;
+        movingPoints = data.stream()
+                .collect(Collectors.groupingBy(GPSGridLocation::getTimePeriod));
+    }
+
     @Override
     public void accept(Result result, List<GPSPoint> data) {
         this.oldResult = result;
@@ -76,26 +82,26 @@ public class ATPDC implements Predicts {
     @Override
     @SuppressWarnings("unchecked")
     public Future<Result> predict() {
-
-        //check 数据完整性
+        //todo: check 数据完整性
         //检查movingPoints是否有合法数据
 
+        return CompletableFuture.supplyAsync(this::mPredict);
+    }
 
-        Future f = new CompletableFuture();
+    @SuppressWarnings("unchecked")
+    private Result mPredict() {
         //1.将用户一天完整的移动点集Setmov 按六个时间段划分为六个相应的移动点子集，
         //分别在各移动点子集上使用 密度聚类算法 对移动点进行聚类形成新 轨迹簇 集合
         //并计算相应的轨迹点及其影响区域，执行步骤2
-
 
         //获取一个当前配置的聚类方案
         Class<? extends Clusterer> clazz = property.getClusterType();
         Clusterer<GPSGridLocation> clusterer = Clusterers.newClustererBy(clazz, GPSGridLocation.class);
 
         //循环6个时间段的集合，对每一个集合做聚类
-        for (List<GPSGridLocation> s : movingPoints) {
-            TimePeriod time = s.get(0).getTimePeriod();
+        movingPoints.forEach((time, list) -> {
             //聚类
-            List<Cluster<GPSGridLocation>> clusteringResult = (List<Cluster<GPSGridLocation>>) clusterer.cluster(s);
+            List<Cluster<GPSGridLocation>> clusteringResult = (List<Cluster<GPSGridLocation>>) clusterer.cluster(list);
             mResult.addClusters4EachTimePeriod(time, clusteringResult);
 
             //并计算相应的轨迹点及其影响区域，执行步骤2
@@ -105,15 +111,7 @@ public class ATPDC implements Predicts {
                     .collect(Collectors.toList());
 
             mResult.addTrackPoint4EachTimePeriod(time, trackPoints);
-        }
-
-
-//        movingPoints.parallelStream().
-//                forEach(this::clustering4Each);
-
-        // TODO: 2018/4/4 @SupressWarning
-//        List clusters = clusterer.cluster(movingLocationData);
-
+        });
 
         //2. 如果Trajold 为空，依次计算各时间段内轨迹点的预测概率并构建用户的移动轨迹
         //预测模型TM；如果Trajold 非空，则执行步骤3
@@ -122,6 +120,7 @@ public class ATPDC implements Predicts {
             Map<TimePeriod, List<TrackPoint>> map = mResult.getClusterTrackPoints();
 //            final Map<TimePeriod, Map<TrackPoint, Double>> probabilities = new HashMap<>();
             map.forEach((time, ll) -> calculateProbability(ll));
+            return mResult;
 //            mResult.setProbabilities(probabilities);
         } else {
             /**
@@ -156,24 +155,51 @@ public class ATPDC implements Predicts {
 
             //删除Trajold 中各时间段内的无效轨迹簇和轨迹点
 
-            Map<TimePeriod, List<Cluster<GPSGridLocation>>> time2Clusters = oldResult.getClusters4EachTimePeriod();
-            time2Clusters.forEach((time, list) -> {
-                List<TrackPoint> trackPoints = list.stream()
-                        .map(this::calculateEffect)
-                        .collect(Collectors.toList());
-                calculateProbability(trackPoints);
+            Map<TimePeriod, List<TrackPoint>> time2TrackPoints = processClusters(oldResult.getClusters4EachTimePeriod());
+            time2TrackPoints.forEach((time, trackPoints) -> {
 
                 trackPoints.sort((p1, p2) -> (int) (p2.getProbability() - p1.getProbability()));
 
+                if (trackPoints.size() > property.getDeleteFromClusterLimit()) {
+                    /**
+                     * 如果某个时间段内的轨迹点个数大于或等于阈值t，则保留t个预测概率较
+                     大的轨迹点和轨迹簇不被删除，将预测概率小于pmin 并且保留次数大于nkep 的轨迹点和相
+                     应的轨迹簇删除
+                     */
+                    List<TrackPoint> removed = trackPoints.subList(property.getDeleteFromClusterLimit(), trackPoints.size());
 
-
+                    //删除轨迹点
+                    trackPoints.removeAll(removed);
+//                    trackPoints = trackPoints.subList(0, property.getDeleteFromClusterLimit());
+                    //删除轨迹簇
+                    removed.forEach(p ->
+                            oldResult.getClusters4EachTimePeriod().get(time).remove(p.getCluster())
+                    );
+                }
             });
 
+            //将newResult中未进行合并操作的新轨迹簇加入到oldResult 中并更新相应的轨迹点及
+            //其影响区域，依次计算轨迹点的预测概率并构建用户的移动轨迹预测模型TM
+            mResult.getClusters4EachTimePeriod().forEach((time, list) ->
+                    oldResult.addClusters4EachTimePeriod(time, list));
 
+            //构建输出
+            processClusters(oldResult.getClusters4EachTimePeriod());
+            return oldResult;
         }
+    }
 
 
-        return null;
+    private Map<TimePeriod, List<TrackPoint>> processClusters(Map<TimePeriod, List<Cluster<GPSGridLocation>>> map) {
+        Map<TimePeriod, List<TrackPoint>> m = new HashMap<>();
+        map.forEach((time, list) -> {
+            List<TrackPoint> trackPoints = list.stream()
+                    .map(this::calculateEffect)
+                    .collect(Collectors.toList());
+            calculateProbability(trackPoints);
+            m.put(time, trackPoints);
+        });
+        return m;
     }
 
     private double calculateSimilarity(TrackPoint p1, TrackPoint p2) {
@@ -213,7 +239,6 @@ public class ATPDC implements Predicts {
      * put data into field movingLocationData
      */
     private void processData(List<GPSPoint> points) {
-
         //GPS经纬度转换到能够参与运算的Grid_x,Grid_y
 
 

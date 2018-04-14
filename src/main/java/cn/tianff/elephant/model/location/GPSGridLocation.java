@@ -3,7 +3,7 @@ package cn.tianff.elephant.model.location;
 import cn.tianff.elephant.model.tracking.TimePeriod;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 
-public class GPSGridLocation implements Clusterable{
+public class GPSGridLocation implements Clusterable {
 
     /**
      * We split the 2-Dimensional plane as grids,
@@ -21,12 +21,15 @@ public class GPSGridLocation implements Clusterable{
     protected GPSGridLocation() {
     }
 
+    // TODO: 2018/4/14
     public GPSGridLocation(GPSPoint point, TimePeriod timePeriod) {
 
     }
 
-    public GPSGridLocation(double gridX,double gridY){
-
+    public GPSGridLocation(double gridX, double gridY, TimePeriod time) {
+        this.gridX = gridX;
+        this.gridY = gridY;
+        this.timePeriod = time;
     }
 
     public TimePeriod getTimePeriod() {
@@ -52,9 +55,8 @@ public class GPSGridLocation implements Clusterable{
         return gridY;
     }
 
-    // TODO: 2018/4/4  
     @Override
     public double[] getPoint() {
-        return new double[0];
+        return new double[]{gridX, gridY};
     }
 }

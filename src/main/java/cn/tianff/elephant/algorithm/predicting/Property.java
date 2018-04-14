@@ -29,7 +29,7 @@ public class Property {
     private double similarityDuringModeling;
     private double similarityDuringUpdating;
 
-    private double deleteFromClusterLimit;
+    private int deleteFromClusterLimit;
 
     private double minPredictProbability;
 
@@ -118,11 +118,11 @@ public class Property {
         this.similarityDuringUpdating = similarityDuringUpdating;
     }
 
-    public double getDeleteFromClusterLimit() {
+    public int getDeleteFromClusterLimit() {
         return deleteFromClusterLimit;
     }
 
-    public void setDeleteFromClusterLimit(double deleteFromClusterLimit) {
+    public void setDeleteFromClusterLimit(int deleteFromClusterLimit) {
         this.deleteFromClusterLimit = deleteFromClusterLimit;
     }
 
