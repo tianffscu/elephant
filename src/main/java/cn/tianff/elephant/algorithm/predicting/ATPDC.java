@@ -87,7 +87,6 @@ public class ATPDC implements Predicts {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Future<Result> predict() {
         //todo: check 数据完整性
         //检查movingPoints是否有合法数据
