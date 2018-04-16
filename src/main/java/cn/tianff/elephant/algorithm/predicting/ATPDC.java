@@ -203,9 +203,10 @@ public class ATPDC implements Predicts {
     }
 
     private double calculateSimilarity(TrackPoint p1, TrackPoint p2) {
+        double distanceOffset = Math.sqrt(Math.pow((p1.getX() - p2.getX()) * property.getGridLength(), 2) +
+                Math.pow((p1.getY() - p2.getY()) * property.getGridHeight(), 2));
 
-
-        return 0;
+        return (p1.getRadius() + p2.getRadius() - distanceOffset) / (Math.min(p1.getRadius(), p2.getRadius()) * 2);
     }
 
     private TrackPoint calculateEffect(Cluster<GPSGridLocation> cluster) {
