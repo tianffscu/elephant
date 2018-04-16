@@ -15,6 +15,8 @@ public class GPSGridLocation implements Clusterable {
 
     private TimePeriod timePeriod;
 
+    private int contains;
+
     /**
      * todo: 修改构造函数使得通过构造函数传参可以完成经纬度到grid_x，grid_y的转换
      */
@@ -26,10 +28,17 @@ public class GPSGridLocation implements Clusterable {
 
     }
 
-    public GPSGridLocation(double gridX, double gridY, TimePeriod time) {
+    public GPSGridLocation(double gridX, double gridY) {
+        this.gridX = gridX;
+        this.gridY = gridY;
+    }
+
+
+    public GPSGridLocation(double gridX, double gridY, TimePeriod time, int contains) {
         this.gridX = gridX;
         this.gridY = gridY;
         this.timePeriod = time;
+        this.contains = contains;
     }
 
     public TimePeriod getTimePeriod() {
@@ -53,6 +62,14 @@ public class GPSGridLocation implements Clusterable {
 
     public double getGridY() {
         return gridY;
+    }
+
+    public int getContains() {
+        return contains;
+    }
+
+    public void setContains(int contains) {
+        this.contains = contains;
     }
 
     @Override

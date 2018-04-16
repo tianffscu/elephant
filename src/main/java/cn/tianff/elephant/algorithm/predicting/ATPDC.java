@@ -209,34 +209,51 @@ public class ATPDC implements Predicts {
     }
 
     private TrackPoint calculateEffect(Cluster<GPSGridLocation> cluster) {
+
+        int sum = cluster.getPoints().stream()
+                .mapToInt(GPSGridLocation::getContains)
+                .sum();
+
+        double gridX = cluster.getPoints().stream()
+                .mapToDouble(p -> p.getContains() * p.getGridX())
+                .map(d -> d / sum)
+                .sum();
+        double gridY = cluster.getPoints().stream()
+                .mapToDouble(p -> p.getContains() * p.getGridY())
+                .map(d -> d / sum)
+                .sum();
+
         TrackPoint trackPoint = new TrackPoint(cluster);
+        trackPoint.setLocation(gridX, gridY);
 
-
-        // TODO: 2018/4/7 计算轨迹点及其影响区域
+        // fixme: 2018/4/7 影响区域
+        double radius = 0;
+        if (sum >= property.getMaxNumInCluster()) {
+            radius = property.getMaxClusterInfectRadius();
+        } else if (sum <= property.getMinNumInCluster()) {
+            radius = property.getMinClusterInfectRadius();
+        } else {
+            radius = sum * property.getMinClusterInfectRadius() / property.getMaxClusterInfectRadius();
+        }
+        trackPoint.setRadius(radius);
 
         return trackPoint;
     }
 
     private void calculateProbability(List<TrackPoint> ll) {
-        // TODO: 2018/4/8
+        int sum = ll.stream()
+                .mapToInt(TrackPoint::getWeight)
+                .sum();
 
-
-    }
-
-    /**
-     * 对一组GPS位置点做聚类
-     *
-     * @param periodLocations
-     */
-    private List<Cluster<GPSGridLocation>> clustering4Each(Set<GPSGridLocation> periodLocations, Clusterer<GPSGridLocation> clusterer) {
-
-
-        return null;
+        ll.forEach(p -> {
+            p.setProbability(p.getWeight() / sum);
+        });
     }
 
     /**
      * transform GpsPoint to GridLocation
      * put data into field movingLocationData
+     * todo: 待实现
      */
     private void processData(List<GPSPoint> points) {
         //GPS经纬度转换到能够参与运算的Grid_x,Grid_y
