@@ -12,6 +12,7 @@ import org.apache.commons.math3.ml.clustering.Clusterer;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
@@ -63,11 +64,17 @@ public class ATPDC implements Predicts {
 
     @Override
     public void accept(List<GPSPoint> data) {
-        processData(data);
+        // TODO: 2018/4/16
+//        processData(data);
+        // TODO: 2018/4/16
     }
 
+    /**
+     * 接收大地坐标
+     * 为了适配数据而添加的耦合性方法
+     */
     public void accept2(List<GPSGridLocation> data) {
-        this.movingLocationData = data;
+        this.movingLocationData = processData(data);
         movingPoints = data.stream()
                 .collect(Collectors.groupingBy(GPSGridLocation::getTimePeriod));
     }
@@ -254,18 +261,64 @@ public class ATPDC implements Predicts {
     /**
      * transform GpsPoint to GridLocation
      * put data into field movingLocationData
-     * todo: 待实现
+     * fixme: 为了测试数据添加的耦合性方法
      */
-    private void processData(List<GPSPoint> points) {
+    private List<GPSGridLocation> processData(List<GPSGridLocation> points) {
         //GPS经纬度转换到能够参与运算的Grid_x,Grid_y
 
+        Map<MiniPoint, Integer> pack = new ConcurrentHashMap<>(points.size() / 3);
 
-        //将处理过的数据按照时间段划分放到movingPoints
+        points.forEach(p -> {
+            double gridX = Math.floor(p.getGridX() / property.getGridLength());
+            double gridY = Math.floor(p.getGridY() / property.getGridHeight());
+
+            MiniPoint miniPoint = new MiniPoint(gridX, gridY, p.getTimePeriod());
+            Integer o = pack.get(miniPoint);
+            pack.put(miniPoint, o == null ? 1 : ++o);
+        });
+
+
+        // FIXME: 2018/4/16 使用stream并行优化
+        List<GPSGridLocation> ll = new ArrayList<>();
+        pack.forEach((p, count) -> {
+            GPSGridLocation loc = new GPSGridLocation(p.x, p.y, p.time, count);
+            ll.add(loc);
+        });
+
+        return ll;
     }
 
     private static Property createDefaultProperty() {
 
 
         return null;
+    }
+
+    class MiniPoint {
+        double x;
+        double y;
+        TimePeriod time;
+
+        int count;
+
+        MiniPoint(double x, double y, TimePeriod time) {
+            this.x = x;
+            this.y = y;
+            this.time = time;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            MiniPoint miniPoint = (MiniPoint) o;
+            return Double.compare(miniPoint.x, x) == 0 &&
+                    Double.compare(miniPoint.y, y) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(x, y);
+        }
     }
 }
